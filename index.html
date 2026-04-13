@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur Impots Couple - France</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --card: #fff;
+            --accent: #2563eb;
+            --accent2: #7c3aed;
+            --green: #059669;
+            --red: #dc2626;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+            --radius: 8px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: #1f2937;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+        .card h2.claudia { border-bottom-color: #f472b6; }
+        .card h2.francois { border-bottom-color: var(--accent); }
+        .field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        .field label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        .field label .case-num {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .field input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        .field input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+        }
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            margin: 12px 0 6px;
+            font-weight: 600;
+        }
+
+        /* Options */
+        .options-bar {
+            max-width: 900px;
+            margin: 16px auto;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .options-bar label {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .options-bar select, .options-bar input[type="number"] {
+            padding: 4px 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* Results */
+        .results {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+        .results h2 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        table.result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: var(--card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        table.result-table th, table.result-table td {
+            padding: 8px 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+        table.result-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        table.result-table td:first-child,
+        table.result-table th:first-child {
+            text-align: left;
+        }
+        table.result-table tr:last-child td { border-bottom: none; }
+        table.result-table tr.highlight {
+            background: #eff6ff;
+            font-weight: 600;
+        }
+        table.result-table tr.savings {
+            background: #ecfdf5;
+        }
+        table.result-table tr.warning {
+            background: #fef2f2;
+        }
+        .positive { color: var(--green); }
+        .negative { color: var(--red); }
+        .muted { color: var(--gray); font-size: 0.8rem; }
+
+        /* Reimbursement card */
+        .reimburse-card {
+            max-width: 900px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+        .reimburse-card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+        .reimburse-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .reimburse-item {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid var(--border);
+        }
+        .reimburse-item .label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .reimburse-item .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .reimburse-item .detail {
+            font-size: 0.78rem;
+            color: var(--gray);
+            margin-top: 2px;
+        }
+        .big-number {
+            text-align: center;
+            margin: 16px 0 8px;
+        }
+        .big-number .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .big-number .label {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            margin-top: 12px;
+        }
+        .detail-table th, .detail-table td {
+            padding: 4px 8px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+        .detail-table th { text-align: left; font-weight: 600; }
+        .detail-table td:first-child { text-align: left; }
+
+        .info-box {
+            max-width: 900px;
+            margin: 16px auto;
+            padding: 12px 16px;
+            background: #fefce8;
+            border: 1px solid #fde68a;
+            border-radius: var(--radius);
+            font-size: 0.82rem;
+            color: #92400e;
+        }
+
+        @media (max-width: 640px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .reimburse-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Password gate -->
+<div id="loginGate" style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;">
+    <h1 style="font-size:1.3rem;">Simulateur Impots</h1>
+    <input type="password" id="pwdInput" placeholder="Mot de passe" style="padding:8px 14px;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;text-align:center;width:220px;" onkeydown="if(event.key==='Enter')checkPwd()">
+    <button onclick="checkPwd()" style="padding:8px 20px;background:#2563eb;color:white;border:none;border-radius:6px;font-size:0.9rem;cursor:pointer;">Entrer</button>
+    <p id="pwdError" style="color:#dc2626;font-size:0.8rem;display:none;">Mot de passe incorrect</p>
+</div>
+
+<div id="appContent" style="display:none;">
+
+<h1>Simulateur Impots Couple</h1>
+<p class="subtitle">Comparaison solo vs. couple, avec/sans PER</p>
+
+<div class="grid-2">
+    <!-- Claudia -->
+    <div class="card">
+        <h2 class="claudia">Claudia (Declarant 2)</h2>
+        <div class="field">
+            <label><span class="case-num">1BJ</span> Salaire</label>
+            <input type="text" id="c_salary" value="57844" oninput="compute()">
+        </div>
+        <div class="section-title">Revenus de capitaux mobiliers</div>
+        <div class="field">
+            <label><span class="case-num">2DC</span> Dividendes</label>
+            <input type="text" id="c_2dc" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2TR</span> Interets</label>
+            <input type="text" id="c_2tr" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2BH</span> RCM + CSG ded.</label>
+            <input type="text" id="c_2bh" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2CG</span> RCM sans CSG ded.</label>
+            <input type="text" id="c_2cg" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2DC</span> au bareme</label>
+            <input type="text" id="c_2dc_bar" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2AB</span> Credit etranger</label>
+            <input type="text" id="c_2ab" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2CK</span> PFU deja verse</label>
+            <input type="text" id="c_2ck" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2ZZ</span></label>
+            <input type="text" id="c_2zz" value="0" oninput="compute()">
+        </div>
+        <div class="section-title">Epargne retraite (PER)</div>
+        <div class="field">
+            <label><span class="case-num">6NT</span> PER Claudia</label>
+            <input type="text" id="c_per" value="0" oninput="compute()">
+        </div>
+        <div class="section-title">Deja paye</div>
+        <div class="field">
+            <label>Impot preleve (PAS)</label>
+            <input type="text" id="c_paid" value="7532" oninput="compute()">
+        </div>
+    </div>
+
+    <!-- Francois -->
+    <div class="card">
+        <h2 class="francois">Francois (Declarant 1)</h2>
+        <div class="field">
+            <label><span class="case-num">1AJ</span> Salaire</label>
+            <input type="text" id="f_salary" value="232908" oninput="compute()">
+        </div>
+        <div class="section-title">Revenus de capitaux mobiliers</div>
+        <div class="field">
+            <label><span class="case-num">2DC</span> Dividendes</label>
+            <input type="text" id="f_2dc" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2TR</span> Interets</label>
+            <input type="text" id="f_2tr" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2BH</span> RCM + CSG ded.</label>
+            <input type="text" id="f_2bh" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2CG</span> RCM sans CSG ded.</label>
+            <input type="text" id="f_2cg" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2DC</span> au bareme</label>
+            <input type="text" id="f_2dc_bar" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2AB</span> Credit etranger</label>
+            <input type="text" id="f_2ab" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2CK</span> PFU deja verse</label>
+            <input type="text" id="f_2ck" value="0" oninput="compute()">
+        </div>
+        <div class="field">
+            <label><span class="case-num">2ZZ</span></label>
+            <input type="text" id="f_2zz" value="0" oninput="compute()">
+        </div>
+        <div class="section-title">Epargne retraite (PER)</div>
+        <div class="field">
+            <label><span class="case-num">6NS</span> PER Francois</label>
+            <input type="text" id="f_per" value="35000" oninput="compute()">
+        </div>
+        <div class="section-title">Deja paye</div>
+        <div class="field">
+            <label>Impot preleve (PAS)</label>
+            <input type="text" id="f_paid" value="69187" oninput="compute()">
+        </div>
+    </div>
+</div>
+
+<div class="options-bar">
+    <label>
+        Revenus financiers :
+        <select id="opt_regime" onchange="compute()">
+            <option value="pfu">PFU (flat tax 12.8%)</option>
+            <option value="bareme">Option bareme progressif</option>
+        </select>
+    </label>
+    <label>
+        Parts couple :
+        <input type="number" id="opt_parts" value="2" step="0.5" min="1" max="10" style="width:60px" onchange="compute()">
+    </label>
+    <label>
+        Annee revenus :
+        <select id="opt_year" onchange="compute()">
+            <option value="2025" selected>2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+        </select>
+    </label>
+</div>
+
+<div class="info-box" id="infoBox"></div>
+
+<!-- Main results table -->
+<div class="results">
+    <h2>Comparaison des scenarios</h2>
+    <table class="result-table" id="mainTable">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Claudia seule</th>
+                <th>Francois seul</th>
+                <th>Couple</th>
+                <th>Couple + PER</th>
+            </tr>
+        </thead>
+        <tbody id="mainBody"></tbody>
+    </table>
+</div>
+
+<!-- Detailed breakdown -->
+<div class="results">
+    <h2>Detail du calcul</h2>
+    <table class="result-table" id="detailTable">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Claudia seule</th>
+                <th>Francois seul</th>
+                <th>Couple</th>
+                <th>Couple + PER</th>
+            </tr>
+        </thead>
+        <tbody id="detailBody"></tbody>
+    </table>
+</div>
+
+<!-- Reimbursement -->
+<div class="reimburse-card">
+    <h2>Solde entre conjoints</h2>
+    <div id="reimburseContent"></div>
+</div>
+
+<script>
+// ---- Tax brackets ----
+const BRACKETS = {
+    2025: [
+        { limit: 11704, rate: 0 },
+        { limit: 29843, rate: 0.11 },
+        { limit: 85332, rate: 0.30 },
+        { limit: 183539, rate: 0.41 },
+        { limit: Infinity, rate: 0.45 }
+    ],
+    2024: [
+        { limit: 11497, rate: 0 },
+        { limit: 29315, rate: 0.11 },
+        { limit: 83823, rate: 0.30 },
+        { limit: 180294, rate: 0.41 },
+        { limit: Infinity, rate: 0.45 }
+    ],
+    2023: [
+        { limit: 11294, rate: 0 },
+        { limit: 28797, rate: 0.11 },
+        { limit: 82341, rate: 0.30 },
+        { limit: 177106, rate: 0.41 },
+        { limit: Infinity, rate: 0.45 }
+    ]
+};
+
+const ABATTEMENT_MAX = { 2025: 14426, 2024: 14171, 2023: 13522 };
+const ABATTEMENT_MIN = { 2025: 504, 2024: 495, 2023: 472 };
+
+function val(id) {
+    const raw = document.getElementById(id).value.replace(/\s/g, '').replace(/,/g, '.');
+    return parseFloat(raw) || 0;
+}
+
+function fmt(n) {
+    return Math.round(n).toLocaleString('fr-FR');
+}
+
+function fmtSign(n) {
+    const r = Math.round(n);
+    if (r > 0) return '+' + r.toLocaleString('fr-FR');
+    if (r < 0) return r.toLocaleString('fr-FR');
+    return '0';
+}
+
+// Apply progressive tax scale
+function applyBareme(revenuImposable, parts, year) {
+    const brackets = BRACKETS[year];
+    if (revenuImposable <= 0) return 0;
+    const quotient = revenuImposable / parts;
+    let tax = 0;
+    let prev = 0;
+    for (const b of brackets) {
+        if (quotient <= prev) break;
+        const slice = Math.min(quotient, b.limit) - prev;
+        tax += slice * b.rate;
+        prev = b.limit;
+    }
+    return Math.round(tax * parts);
+}
+
+// Marginal rate
+function marginalRate(revenuImposable, parts, year) {
+    const brackets = BRACKETS[year];
+    const quotient = revenuImposable / parts;
+    let rate = 0;
+    for (const b of brackets) {
+        if (quotient <= b.limit) { rate = b.rate; break; }
+    }
+    return rate;
+}
+
+// Salary abattement (10%)
+function salaryAbattement(salary, year) {
+    const raw = salary * 0.10;
+    return Math.min(Math.max(raw, ABATTEMENT_MIN[year]), ABATTEMENT_MAX[year]);
+}
+
+// Full scenario calculation
+function calcScenario(params) {
+    const { salaryC, salaryF, dc_c, dc_f, tr_c, tr_f, bh_c, bh_f,
+            cg_c, cg_f, dc_bar_c, dc_bar_f, ab_c, ab_f, ck_c, ck_f,
+            zz_c, zz_f, per_c, per_f, parts, regime, year } = params;
+
+    const totalSalary = salaryC + salaryF;
+    const abatC = salaryAbattement(salaryC, year);
+    const abatF = salaryAbattement(salaryF, year);
+    const netSalaryC = salaryC - abatC;
+    const netSalaryF = salaryF - abatF;
+    const netSalary = netSalaryC + netSalaryF;
+
+    // Investment income
+    const totalDC = dc_c + dc_f;
+    const totalTR = tr_c + tr_f;
+    const totalBH = bh_c + bh_f;
+    const totalCG = cg_c + cg_f;
+    const totalDCbar = dc_bar_c + dc_bar_f;
+    const totalAB = ab_c + ab_f;
+    const totalCK = ck_c + ck_f;
+    const totalZZ = zz_c + zz_f;
+    const totalPER = per_c + per_f;
+
+    let investmentIncome = 0;
+    let csgDeductible = 0;
+    let investmentTaxPFU = 0;
+    let creditImpot = totalAB + totalCK;
+
+    if (regime === 'bareme') {
+        // Dividends: 40% abattement
+        investmentIncome += totalDC * 0.60;
+        // Interest: no abattement
+        investmentIncome += totalTR;
+        // 2ZZ added to income
+        investmentIncome += totalZZ;
+        // CSG deductible: 6.8% of 2BH
+        csgDeductible = totalBH * 0.068;
+    } else {
+        // PFU: 12.8% on investment income (already withheld = 2CK)
+        // Investment income NOT added to progressive scale
+        investmentTaxPFU = (totalDC + totalTR + totalZZ) * 0.128;
+        // 2CK is credit for PFU already paid
+        // Net PFU = investmentTaxPFU - totalCK (but we handle credits globally)
+        creditImpot = totalAB; // CK offsets PFU
+        investmentIncome = 0;
+        csgDeductible = 0;
+    }
+
+    // Revenu imposable
+    const revenuBrut = netSalary + investmentIncome - csgDeductible;
+    const revenuImposable = Math.max(0, revenuBrut - totalPER);
+
+    // Tax
+    let impotBrut = applyBareme(revenuImposable, parts, year);
+
+    // For PFU regime, add flat tax on investments
+    if (regime === 'pfu') {
+        impotBrut += Math.max(0, investmentTaxPFU - totalCK);
+    }
+
+    // Credits
+    let impotNet = Math.max(0, impotBrut - creditImpot);
+
+    // For bareme, deduct 2CK
+    if (regime === 'bareme') {
+        impotNet = Math.max(0, impotBrut - creditImpot);
+    }
+
+    const tmi = marginalRate(revenuImposable, parts, year);
+
+    return {
+        totalSalary,
+        netSalary,
+        abatC, abatF,
+        investmentIncome,
+        csgDeductible,
+        totalPER,
+        revenuBrut,
+        revenuImposable,
+        impotBrut,
+        creditImpot,
+        impotNet,
+        tmi,
+        parts
+    };
+}
+
+function compute() {
+    const year = parseInt(document.getElementById('opt_year').value);
+    const regime = document.getElementById('opt_regime').value;
+    const partsCouple = parseFloat(document.getElementById('opt_parts').value) || 2;
+
+    const inputs = {
+        salaryC: val('c_salary'), salaryF: val('f_salary'),
+        dc_c: val('c_2dc'), dc_f: val('f_2dc'),
+        tr_c: val('c_2tr'), tr_f: val('f_2tr'),
+        bh_c: val('c_2bh'), bh_f: val('f_2bh'),
+        cg_c: val('c_2cg'), cg_f: val('f_2cg'),
+        dc_bar_c: val('c_2dc_bar'), dc_bar_f: val('f_2dc_bar'),
+        ab_c: val('c_2ab'), ab_f: val('f_2ab'),
+        ck_c: val('c_2ck'), ck_f: val('f_2ck'),
+        zz_c: val('c_2zz'), zz_f: val('f_2zz'),
+        per_c: val('c_per'), per_f: val('f_per'),
+        paid_c: val('c_paid'), paid_f: val('f_paid'),
+        year, regime
+    };
+
+    // Scenario 1: Claudia seule (1 part)
+    const claudiaSeule = calcScenario({
+        ...inputs,
+        salaryF: 0, dc_f: 0, tr_f: 0, bh_f: 0, cg_f: 0,
+        dc_bar_f: 0, ab_f: 0, ck_f: 0, zz_f: 0, per_f: 0, per_c: 0,
+        parts: 1
+    });
+
+    // Scenario 2: Francois seul (1 part)
+    const francoisSeul = calcScenario({
+        ...inputs,
+        salaryC: 0, dc_c: 0, tr_c: 0, bh_c: 0, cg_c: 0,
+        dc_bar_c: 0, ab_c: 0, ck_c: 0, zz_c: 0, per_c: 0, per_f: 0,
+        parts: 1
+    });
+
+    // Scenario 3: Couple sans PER
+    const coupleSansPER = calcScenario({
+        ...inputs, per_c: 0, per_f: 0, parts: partsCouple
+    });
+
+    // Scenario 4: Couple avec PER
+    const coupleAvecPER = calcScenario({
+        ...inputs, parts: partsCouple
+    });
+
+    // ---- Render main table ----
+    const sumSeuls = claudiaSeule.impotNet + francoisSeul.impotNet;
+    const economieMariage = sumSeuls - coupleSansPER.impotNet;
+    const economiePER = coupleSansPER.impotNet - coupleAvecPER.impotNet;
+    const economieTotal = sumSeuls - coupleAvecPER.impotNet;
+    const partClaudia = inputs.salaryC / (inputs.salaryC + inputs.salaryF);
+    const partFrancois = 1 - partClaudia;
+
+    const mainRows = [
+        { label: 'Salaires declares', vals: [fmt(inputs.salaryC), fmt(inputs.salaryF), fmt(inputs.salaryC + inputs.salaryF), fmt(inputs.salaryC + inputs.salaryF)], cls: '' },
+        { label: 'Revenu imposable', vals: [fmt(claudiaSeule.revenuImposable), fmt(francoisSeul.revenuImposable), fmt(coupleSansPER.revenuImposable), fmt(coupleAvecPER.revenuImposable)], cls: '' },
+        { label: 'PER deduit', vals: ['0', '0', '0', fmt(coupleAvecPER.totalPER)], cls: '' },
+        { label: 'TMI', vals: [(claudiaSeule.tmi*100)+'%', (francoisSeul.tmi*100)+'%', (coupleSansPER.tmi*100)+'%', (coupleAvecPER.tmi*100)+'%'], cls: '' },
+        { label: 'Impot net', vals: [fmt(claudiaSeule.impotNet), fmt(francoisSeul.impotNet), fmt(coupleSansPER.impotNet), fmt(coupleAvecPER.impotNet)], cls: 'highlight' },
+        { label: 'Somme seuls (C+F)', vals: ['-', '-', fmt(sumSeuls), fmt(sumSeuls)], cls: '' },
+        { label: 'Economie mariage', vals: ['-', '-', '<span class="positive">-' + fmt(economieMariage) + '</span>', '<span class="positive">-' + fmt(economieMariage) + '</span>'], cls: 'savings' },
+        { label: 'Economie PER', vals: ['-', '-', '-', '<span class="positive">-' + fmt(economiePER) + '</span>'], cls: 'savings' },
+        { label: 'Economie totale', vals: ['-', '-', '-', '<span class="positive">-' + fmt(economieTotal) + '</span>'], cls: 'savings' },
+        { label: 'Part revenus Claudia', vals: [(partClaudia*100).toFixed(1)+'%', '-', (partClaudia*100).toFixed(1)+'%', (partClaudia*100).toFixed(1)+'%'], cls: '' },
+    ];
+
+    document.getElementById('mainBody').innerHTML = mainRows.map(r =>
+        `<tr class="${r.cls}"><td>${r.label}</td>${r.vals.map(v => `<td>${v}</td>`).join('')}</tr>`
+    ).join('');
+
+    // ---- Detail table ----
+    const detailRows = [
+        { label: 'Salaire brut', vals: [fmt(claudiaSeule.totalSalary), fmt(francoisSeul.totalSalary), fmt(coupleSansPER.totalSalary), fmt(coupleAvecPER.totalSalary)] },
+        { label: 'Abattement 10%', vals: [fmt(claudiaSeule.abatC), fmt(francoisSeul.abatF), fmt(coupleSansPER.abatC + coupleSansPER.abatF), fmt(coupleAvecPER.abatC + coupleAvecPER.abatF)] },
+        { label: 'Salaire net fiscal', vals: [fmt(claudiaSeule.netSalary), fmt(francoisSeul.netSalary), fmt(coupleSansPER.netSalary), fmt(coupleAvecPER.netSalary)] },
+        { label: 'Rev. capitaux (IR)', vals: [fmt(claudiaSeule.investmentIncome), fmt(francoisSeul.investmentIncome), fmt(coupleSansPER.investmentIncome), fmt(coupleAvecPER.investmentIncome)] },
+        { label: 'CSG deductible', vals: [fmt(claudiaSeule.csgDeductible), fmt(francoisSeul.csgDeductible), fmt(coupleSansPER.csgDeductible), fmt(coupleAvecPER.csgDeductible)] },
+        { label: 'PER deduit', vals: ['0', '0', '0', fmt(coupleAvecPER.totalPER)] },
+        { label: 'Revenu imposable', vals: [fmt(claudiaSeule.revenuImposable), fmt(francoisSeul.revenuImposable), fmt(coupleSansPER.revenuImposable), fmt(coupleAvecPER.revenuImposable)] },
+        { label: 'Nb parts', vals: ['1', '1', partsCouple, partsCouple] },
+        { label: 'Quotient familial', vals: [fmt(claudiaSeule.revenuImposable), fmt(francoisSeul.revenuImposable), fmt(coupleSansPER.revenuImposable / partsCouple), fmt(coupleAvecPER.revenuImposable / partsCouple)] },
+        { label: 'Impot brut', vals: [fmt(claudiaSeule.impotBrut), fmt(francoisSeul.impotBrut), fmt(coupleSansPER.impotBrut), fmt(coupleAvecPER.impotBrut)] },
+        { label: 'Credits impot', vals: [fmt(claudiaSeule.creditImpot), fmt(francoisSeul.creditImpot), fmt(coupleSansPER.creditImpot), fmt(coupleAvecPER.creditImpot)] },
+        { label: 'Impot net', vals: [fmt(claudiaSeule.impotNet), fmt(francoisSeul.impotNet), fmt(coupleSansPER.impotNet), fmt(coupleAvecPER.impotNet)] },
+    ];
+
+    document.getElementById('detailBody').innerHTML = detailRows.map(r =>
+        `<tr><td>${r.label}</td>${r.vals.map(v => `<td>${v}</td>`).join('')}</tr>`
+    ).join('');
+
+    // ---- Reimbursement ----
+    const paidC = inputs.paid_c;
+    const paidF = inputs.paid_f;
+    const totalPaid = paidC + paidF;
+
+    // Economies mariage partagees au prorata, PER pour Francois
+    const claudiaSavingsMariage = economieMariage * partClaudia;
+    const claudiaPartJuste = claudiaSeule.impotNet - claudiaSavingsMariage;
+    const francoisPartJuste = coupleAvecPER.impotNet - claudiaPartJuste;
+
+    const soldeClaudia = claudiaPartJuste - paidC;
+    const soldeFrancois = francoisPartJuste - paidF;
+    const resteAPayer = coupleAvecPER.impotNet - totalPaid;
+
+    // Transfer: positive = Claudia a trop paye -> Francois lui doit
+    const transfer = paidC - claudiaPartJuste;
+
+    function fmtSolde(n) {
+        const r = Math.round(n);
+        if (r > 0) return '<span class="negative">doit encore ' + fmt(r) + ' &euro;</span>';
+        if (r < 0) return '<span class="positive">a trop paye de ' + fmt(-r) + ' &euro;</span>';
+        return 'OK';
+    }
+
+    const reimburseHTML = `
+        <div class="reimburse-grid">
+            <div class="reimburse-item">
+                <div class="label">Impot couple (avec PER)</div>
+                <div class="value">${fmt(coupleAvecPER.impotNet)} &euro;</div>
+            </div>
+            <div class="reimburse-item">
+                <div class="label">Deja paye (PAS)</div>
+                <div class="value">${fmt(totalPaid)} &euro;</div>
+                <div class="detail">C. ${fmt(paidC)} + F. ${fmt(paidF)}</div>
+            </div>
+            <div class="reimburse-item">
+                <div class="label">Reste a payer au fisc</div>
+                <div class="value ${resteAPayer > 0 ? 'negative' : 'positive'}">${resteAPayer > 0 ? fmt(resteAPayer) : resteAPayer < 0 ? 'Remboursement ' + fmt(-resteAPayer) : '0'} &euro;</div>
+            </div>
+            <div class="reimburse-item">
+                <div class="label">Economie totale vs. seuls</div>
+                <div class="value positive">-${fmt(economieTotal)} &euro;</div>
+                <div class="detail">Mariage ${fmt(economieMariage)} + PER ${fmt(economiePER)}</div>
+            </div>
+        </div>
+
+        <h3 style="margin-top:20px;font-size:0.95rem;">Repartition equitable</h3>
+        <p class="muted">Economies mariage partagees au prorata des revenus. Economies PER pour Francois.</p>
+        <table class="detail-table">
+            <tr><th></th><th>Impot solo</th><th>Eco. mariage</th><th>Part juste</th><th>Deja paye</th><th>Solde</th></tr>
+            <tr>
+                <td>Claudia</td>
+                <td>${fmt(claudiaSeule.impotNet)} &euro;</td>
+                <td class="positive">-${fmt(claudiaSavingsMariage)} &euro;</td>
+                <td><strong>${fmt(claudiaPartJuste)} &euro;</strong></td>
+                <td>${fmt(paidC)} &euro;</td>
+                <td>${fmtSolde(soldeClaudia)}</td>
+            </tr>
+            <tr>
+                <td>Francois</td>
+                <td>${fmt(francoisSeul.impotNet)} &euro;</td>
+                <td class="positive">-${fmt(economieMariage - claudiaSavingsMariage)} &euro; -${fmt(economiePER)} &euro; <span class="muted">(PER)</span></td>
+                <td><strong>${fmt(francoisPartJuste)} &euro;</strong></td>
+                <td>${fmt(paidF)} &euro;</td>
+                <td>${fmtSolde(soldeFrancois)}</td>
+            </tr>
+            <tr style="border-top:2px solid var(--border);">
+                <td><strong>Total</strong></td>
+                <td>${fmt(sumSeuls)} &euro;</td>
+                <td class="positive">-${fmt(economieTotal)} &euro;</td>
+                <td><strong>${fmt(coupleAvecPER.impotNet)} &euro;</strong></td>
+                <td><strong>${fmt(totalPaid)} &euro;</strong></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <div style="margin-top:24px;padding:24px;background:white;border:3px solid var(--accent);border-radius:10px;text-align:center;">
+            <div style="font-size:0.85rem;color:var(--gray);margin-bottom:8px;">
+                ${transfer > 0
+                    ? 'Claudia a trop paye par rapport a sa part juste.'
+                    : transfer < 0
+                    ? 'Claudia n\'a pas assez paye par rapport a sa part juste.'
+                    : 'C\'est equilibre.'}
+            </div>
+            <div style="font-size:1.1rem;margin-bottom:4px;">
+                ${transfer > 0
+                    ? '<strong>Francois doit verser a Claudia</strong>'
+                    : transfer < 0
+                    ? '<strong>Claudia doit verser a Francois</strong>'
+                    : ''}
+            </div>
+            <div style="font-size:2.5rem;font-weight:800;color:var(--accent);">
+                ${fmt(Math.abs(transfer))} &euro;
+            </div>
+        </div>
+
+        <div style="margin-top:16px;padding:12px;background:#f0fdf4;border-radius:6px;font-size:0.85rem;">
+            <strong>Detail :</strong><br>
+            &bull; Claudia seule aurait paye <strong>${fmt(claudiaSeule.impotNet)} &euro;</strong>, elle economise <strong>${fmt(claudiaSavingsMariage)} &euro;</strong> grace au mariage &rarr; part juste = <strong>${fmt(claudiaPartJuste)} &euro;</strong><br>
+            &bull; Elle a deja paye <strong>${fmt(paidC)} &euro;</strong> via le PAS &rarr; ${paidC > claudiaPartJuste ? 'trop-paye de <strong>' + fmt(paidC - claudiaPartJuste) + ' &euro;</strong>' : 'reste <strong>' + fmt(claudiaPartJuste - paidC) + ' &euro;</strong> a payer'}<br>
+            &bull; Francois seul aurait paye <strong>${fmt(francoisSeul.impotNet)} &euro;</strong>, il economise <strong>${fmt(economieMariage - claudiaSavingsMariage)} &euro;</strong> (mariage) + <strong>${fmt(economiePER)} &euro;</strong> (PER) &rarr; part juste = <strong>${fmt(francoisPartJuste)} &euro;</strong><br>
+            &bull; Il a deja paye <strong>${fmt(paidF)} &euro;</strong> via le PAS &rarr; ${paidF > francoisPartJuste ? 'trop-paye de <strong>' + fmt(paidF - francoisPartJuste) + ' &euro;</strong>' : 'reste <strong>' + fmt(francoisPartJuste - paidF) + ' &euro;</strong> a payer'}
+        </div>
+    `;
+
+    document.getElementById('reimburseContent').innerHTML = reimburseHTML;
+
+    // Info box
+    document.getElementById('infoBox').innerHTML = `
+        Bareme ${year} | Regime : ${regime === 'pfu' ? 'PFU (flat tax)' : 'Option bareme'} |
+        Abattement 10% : Claudia ${fmt(claudiaSeule.abatC)} &euro; / Francois ${fmt(francoisSeul.abatF)} &euro; |
+        Plafond abattement : ${fmt(ABATTEMENT_MAX[year])} &euro;
+    `;
+}
+
+// Initial compute
+compute();
+
+// Password
+const PWD_HASH = '5f4a3e2b';
+function simpleHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) {
+        h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    }
+    return (h >>> 0).toString(16);
+}
+function checkPwd() {
+    const input = document.getElementById('pwdInput').value;
+    if (simpleHash(input) === simpleHash('Impots C&F')) {
+        document.getElementById('loginGate').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+        sessionStorage.setItem('auth', '1');
+    } else {
+        document.getElementById('pwdError').style.display = 'block';
+    }
+}
+if (sessionStorage.getItem('auth') === '1') {
+    document.getElementById('loginGate').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+}
+</script>
+
+</div><!-- end appContent -->
+
+</body>
+</html>
