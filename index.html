@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulateur Impots Couple</title>
     <style>
-        :root { --bg:#f5f5f5; --card:#fff; --accent:#2563eb; --green:#059669; --red:#dc2626; --gray:#6b7280; --border:#e5e7eb; --radius:8px; }
+        :root{--bg:#f5f5f5;--card:#fff;--accent:#2563eb;--green:#059669;--red:#dc2626;--gray:#6b7280;--border:#e5e7eb;--radius:8px}
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:#1f2937;line-height:1.5;padding:16px}
         h1{text-align:center;font-size:1.4rem;margin-bottom:16px}
@@ -35,13 +35,18 @@
         table.rt tr.hi{background:#eff6ff;font-weight:600}
         table.rt tr.sav{background:#ecfdf5}
         .pos{color:var(--green)} .neg{color:var(--red)} .mu{color:var(--gray);font-size:.78rem}
-        .verdict{max-width:900px;margin:18px auto;padding:24px;background:linear-gradient(135deg,#eff6ff 0%,#f0fdf4 100%);border:2px solid var(--accent);border-radius:var(--radius);text-align:center}
-        .verdict .amount{font-size:2.4rem;font-weight:800;color:var(--accent)}
-        .verdict .sub{font-size:.85rem;color:var(--gray);margin-top:4px}
+        .verdict{max-width:900px;margin:18px auto;padding:24px;background:linear-gradient(135deg,#eff6ff 0%,#f0fdf4 100%);border:2px solid var(--accent);border-radius:var(--radius)}
+        .verdict .amount{font-size:2.4rem;font-weight:800;color:var(--accent);text-align:center}
+        .verdict .sub{font-size:.85rem;color:var(--gray);margin-top:4px;text-align:center}
         .detail-box{max-width:900px;margin:12px auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-size:.82rem}
         .detail-box table{width:100%;border-collapse:collapse;margin-top:8px}
         .detail-box th,.detail-box td{padding:3px 8px;text-align:right;border-bottom:1px solid var(--border)}
         .detail-box th{text-align:left;font-weight:600} .detail-box td:first-child{text-align:left}
+        .split-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0}
+        .split-table th,.split-table td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border)}
+        .split-table th{text-align:left;font-weight:600;color:var(--gray);font-size:.75rem;text-transform:uppercase}
+        .split-table td:first-child{text-align:left;font-weight:500}
+        .split-table tr.total{border-top:2px solid var(--gray);font-weight:700}
         @media(max-width:640px){.grid-2{grid-template-columns:1fr}}
     </style>
 </head>
@@ -60,7 +65,6 @@
 <h1>Simulateur Impots Couple</h1>
 
 <div class="grid-2">
-    <!-- Claudia -->
     <div class="card">
         <h2 class="c">Claudia</h2>
         <div class="field"><label><b>1BJ</b> Salaire</label><input type="text" id="c_sal" value="57844" oninput="compute()"></div>
@@ -80,7 +84,6 @@
             <div class="field"><label><b>6NT</b> PER Claudia</label><input type="text" id="c_per" value="0" oninput="compute()"></div>
         </details>
     </div>
-    <!-- Francois -->
     <div class="card">
         <h2 class="f">Francois</h2>
         <div class="field"><label><b>1AJ</b> Salaire</label><input type="text" id="f_sal" value="232908" oninput="compute()"></div>
@@ -121,9 +124,9 @@
     </label>
 </div>
 
-<!-- Main results -->
+<!-- Main comparison table -->
 <div class="results">
-    <table class="rt" id="mainTable"><thead><tr>
+    <table class="rt"><thead><tr>
         <th></th><th>Claudia seule</th><th>Francois seul</th><th>Couple</th><th>Couple + PER</th>
     </tr></thead><tbody id="mainBody"></tbody></table>
 </div>
@@ -131,31 +134,23 @@
 <!-- Verdict -->
 <div class="verdict" id="verdict"></div>
 
-<!-- Detail breakdown -->
+<!-- Details -->
 <div class="results">
     <details>
-        <summary style="font-size:.9rem;">Detail du calcul</summary>
+        <summary style="font-size:.9rem;">Detail complet du calcul</summary>
         <table class="rt" style="margin-top:8px"><thead><tr>
             <th></th><th>C. seule</th><th>F. seul</th><th>Couple</th><th>C+PER</th>
         </tr></thead><tbody id="detailBody"></tbody></table>
     </details>
 </div>
 
-<!-- Repartition detail -->
-<div class="detail-box">
-    <details>
-        <summary style="font-size:.9rem;">Detail de la repartition</summary>
-        <div id="repartDetail"></div>
-    </details>
-</div>
-
 </div><!-- end appContent -->
 
 <script>
-const BRACKETS = {
-    2025: [{limit:11704,rate:0},{limit:29843,rate:.11},{limit:85332,rate:.30},{limit:183539,rate:.41},{limit:Infinity,rate:.45}],
-    2024: [{limit:11497,rate:0},{limit:29315,rate:.11},{limit:83823,rate:.30},{limit:180294,rate:.41},{limit:Infinity,rate:.45}],
-    2023: [{limit:11294,rate:0},{limit:28797,rate:.11},{limit:82341,rate:.30},{limit:177106,rate:.41},{limit:Infinity,rate:.45}]
+const BRACKETS={
+    2025:[{limit:11704,rate:0},{limit:29843,rate:.11},{limit:85332,rate:.30},{limit:183539,rate:.41},{limit:Infinity,rate:.45}],
+    2024:[{limit:11497,rate:0},{limit:29315,rate:.11},{limit:83823,rate:.30},{limit:180294,rate:.41},{limit:Infinity,rate:.45}],
+    2023:[{limit:11294,rate:0},{limit:28797,rate:.11},{limit:82341,rate:.30},{limit:177106,rate:.41},{limit:Infinity,rate:.45}]
 };
 const ABAT_MAX={2025:14426,2024:14171,2023:13522};
 const ABAT_MIN={2025:504,2024:495,2023:472};
@@ -169,57 +164,78 @@ function baremeIR(ri,parts,yr){
     for(const b of BRACKETS[yr]){if(q<=p)break;t+=(Math.min(q,b.limit)-p)*b.rate;p=b.limit;}
     return Math.round(t*parts);
 }
-function tmi(ri,parts,yr){
+function getTMI(ri,parts,yr){
     const q=ri/parts;let r=0;
     for(const b of BRACKETS[yr]){if(q<=b.limit){r=b.rate;break;}}return r;
 }
-function salAbat(s,yr){return Math.min(Math.max(s*.10,ABAT_MIN[yr]),ABAT_MAX[yr])}
+function salAbat(s,yr){return s>0?Math.min(Math.max(s*.10,ABAT_MIN[yr]),ABAT_MAX[yr]):0}
 
-function calc(p){
+// ---------- Individual investment tax (per person) ----------
+// Each person's own investment tax, independent of salary or couple status
+function investTaxPerson(dc,tr,zz,bh,cg,ck,ab,regime,salNetForBareme,per,parts,yr){
+    const base=dc+tr+zz;
+    const alreadyPS=bh+cg;
+    const ps=Math.max(0,base-alreadyPS)*PS_RATE;
+
+    let ir=0;
+    if(regime==='pfu'){
+        ir=base*PFU_IR_RATE;
+    } else {
+        // In bareme: investment income taxed at marginal rate of the combined income
+        // We compute the marginal IR impact of adding investment income to salNetForBareme
+        const csgDed=bh*0.068;
+        const invIncome=dc*0.6+tr+zz;
+        const withInv=baremeIR(Math.max(0,salNetForBareme+invIncome-csgDed-per),parts,yr);
+        const withoutInv=baremeIR(Math.max(0,salNetForBareme-per),parts,yr);
+        ir=withInv-withoutInv;
+    }
+    const credits=ck+ab;
+    const irNet=Math.max(0,ir-credits);
+    return {irNet,ps,total:irNet+ps,base,credits,ir};
+}
+
+// ---------- Full scenario (for the comparison table) ----------
+function calcScenario(p){
     const {salC,salF,dcC,dcF,trC,trF,bhC,bhF,cgC,cgF,abC,abF,ckC,ckF,zzC,zzF,perC,perF,parts,regime,yr}=p;
-    const sal=salC+salF;
-    const abC_=salC?salAbat(salC,yr):0, abF_=salF?salAbat(salF,yr):0;
-    const netSal=(salC-abC_)+(salF-abF_);
-
-    // Investment totals
+    const abatC=salAbat(salC,yr), abatF=salAbat(salF,yr);
+    const netSal=(salC-abatC)+(salF-abatF);
     const dc=dcC+dcF, tr=trC+trF, bh=bhC+bhF, cg=cgC+cgF;
     const ab=abC+abF, ck=ckC+ckF, zz=zzC+zzF;
     const per=perC+perF;
-    const investBase=dc+tr+zz; // total investment income base
-
-    // PS: 17.2% on investment income not already subject to PS
+    const investBase=dc+tr+zz;
     const alreadyPS=bh+cg;
     const psdue=Math.max(0,investBase-alreadyPS)*PS_RATE;
 
     let irSal=0, irInvest=0, csgDed=0, revImp=0;
-
     if(regime==='pfu'){
-        // Salary: progressive
         const revSal=Math.max(0,netSal-per);
         irSal=baremeIR(revSal,parts,yr);
         revImp=revSal;
-        // Investments: flat 12.8%
         irInvest=investBase*PFU_IR_RATE;
     } else {
-        // Bareme: everything progressive
         csgDed=bh*0.068;
-        const invIncome=dc*0.6+tr+zz; // 40% abattement on dividends
+        const invIncome=dc*0.6+tr+zz;
         revImp=Math.max(0,netSal+invIncome-csgDed-per);
         const irTotal=baremeIR(revImp,parts,yr);
-        // Split: attribute investment IR as marginal impact
-        const irSalOnly=baremeIR(Math.max(0,netSal-csgDed-per),parts,yr);
+        const irSalOnly=baremeIR(Math.max(0,netSal-per),parts,yr);
         irInvest=irTotal-irSalOnly;
         irSal=irSalOnly;
     }
-
     const credits=ck+ab;
     const irBrut=irSal+irInvest;
     const irNet=Math.max(0,irBrut-credits);
     const totalTax=irNet+psdue;
-    const tmi_=tmi(revImp,parts,yr);
+    const tmi_=getTMI(revImp,parts,yr);
+    return {sal:salC+salF,netSal,per,investBase,irSal,irInvest,psdue,credits,irBrut,irNet,totalTax,revImp,tmi_,parts,csgDed,abatC,abatF,alreadyPS};
+}
 
-    return {sal,netSal,per,investBase,irSal,irInvest,psdue,credits,irBrut,irNet,totalTax,revImp,tmi_:tmi_,parts,csgDed,
-            abC_,abF_,alreadyPS,dc,tr,zz};
+// ---------- Salary-only tax for couple (no investments) ----------
+function salaryOnlyCoupleTax(inp,parts,withPER){
+    return calcScenario({
+        ...inp,dcC:0,dcF:0,trC:0,trF:0,bhC:0,bhF:0,cgC:0,cgF:0,abC:0,abF:0,ckC:0,ckF:0,zzC:0,zzF:0,
+        perC:withPER?inp.perC:0,perF:withPER?inp.perF:0,
+        parts
+    });
 }
 
 function compute(){
@@ -237,19 +253,67 @@ function compute(){
     };
     const paidC=v('c_paid'), paidF=v('f_paid'), totalPaid=paidC+paidF;
 
-    // 4 scenarios
-    const cS=calc({...inp,salF:0,dcF:0,trF:0,bhF:0,cgF:0,abF:0,ckF:0,zzF:0,perF:0,perC:0,parts:1});
-    const fS=calc({...inp,salC:0,dcC:0,trC:0,bhC:0,cgC:0,abC:0,ckC:0,zzC:0,perC:0,perF:0,parts:1});
-    const cpl=calc({...inp,perC:0,perF:0,parts:partsC});
-    const cplPER=calc({...inp,parts:partsC});
+    // ===== 4 main scenarios (for comparison table) =====
+    const cS=calcScenario({...inp,salF:0,dcF:0,trF:0,bhF:0,cgF:0,abF:0,ckF:0,zzF:0,perF:0,perC:0,parts:1});
+    const fS=calcScenario({...inp,salC:0,dcC:0,trC:0,bhC:0,cgC:0,abC:0,ckC:0,zzC:0,perC:0,perF:0,parts:1});
+    const cpl=calcScenario({...inp,perC:0,perF:0,parts:partsC});
+    const cplPER=calcScenario({...inp,parts:partsC});
 
     const sumSeuls=cS.totalTax+fS.totalTax;
     const ecoMariage=sumSeuls-cpl.totalTax;
     const ecoPER=cpl.totalTax-cplPER.totalTax;
     const ecoTotal=sumSeuls-cplPER.totalTax;
-    const partC=inp.salC/(inp.salC+inp.salF);
 
-    // Main table
+    // ===== Repartition: separate salary tax from investment tax =====
+
+    // 1) Each person's individual investment tax
+    //    In couple context: use combined salary net as base for bareme marginal rate
+    const coupleNetSal=(inp.salC-salAbat(inp.salC,yr))+(inp.salF-salAbat(inp.salF,yr));
+    const couplePerTotal=inp.perC+inp.perF;
+
+    const investC=investTaxPerson(inp.dcC,inp.trC,inp.zzC,inp.bhC,inp.cgC,inp.ckC,inp.abC,
+        regime,coupleNetSal,couplePerTotal,partsC,yr);
+    const investF=investTaxPerson(inp.dcF,inp.trF,inp.zzF,inp.bhF,inp.cgF,inp.ckF,inp.abF,
+        regime,coupleNetSal,couplePerTotal,partsC,yr);
+
+    // 2) Salary-only couple tax (with PER)
+    const salCoupleWithPER=salaryOnlyCoupleTax(inp,partsC,true);
+    const salCoupleSansPER=salaryOnlyCoupleTax(inp,partsC,false);
+
+    // 3) Salary-only solo taxes
+    const salCSolo=salaryOnlyCoupleTax({...inp,salF:0,perC:0,perF:0},1,false);
+    const salFSolo=salaryOnlyCoupleTax({...inp,salC:0,perC:0,perF:0},1,false);
+
+    // 4) Marriage savings on salary only
+    const salSumSeuls=salCSolo.totalTax+salFSolo.totalTax;
+    const salEcoMariage=salSumSeuls-salCoupleSansPER.totalTax;
+    const salEcoPER=salCoupleSansPER.totalTax-salCoupleWithPER.totalTax;
+
+    // 5) Share salary marriage savings proportionally to salary
+    const partC=inp.salC/(inp.salC+inp.salF);
+    const salEcoMariageC=salEcoMariage*partC;
+    const salEcoMariageF=salEcoMariage*(1-partC);
+
+    // 6) Each person's salary share in the couple
+    const salShareC=salCSolo.totalTax-salEcoMariageC;  // Claudia's salary tax after marriage savings
+    const salShareF=salCoupleWithPER.totalTax-salShareC; // Francois gets the rest (including PER savings)
+
+    // 7) Total fair share = salary share + own investment tax
+    const claudiaJuste=salShareC+investC.total;
+    const francoisJuste=salShareF+investF.total;
+
+    // Verification: should sum to couple total tax
+    // Note: in bareme mode, there's interaction between salary and investment marginal rates
+    // so investC+investF might not perfectly match the couple's total investment tax.
+    // We adjust Francois's share to absorb any rounding/interaction difference.
+    const coupleTotal=cplPER.totalTax;
+    const adjustedFrancoisJuste=coupleTotal-claudiaJuste;
+
+    const soldeC=claudiaJuste-paidC;
+    const soldeF=adjustedFrancoisJuste-paidF;
+    const transfer=paidC-claudiaJuste; // >0 = Claudia overpaid
+
+    // ===== Main comparison table =====
     const rows=[
         ['Salaires',fmt(inp.salC),fmt(inp.salF),fmt(inp.salC+inp.salF),fmt(inp.salC+inp.salF),''],
         ['Rev. capitaux',fmt(cS.investBase),fmt(fS.investBase),fmt(cpl.investBase),fmt(cplPER.investBase),''],
@@ -271,10 +335,10 @@ function compute(){
         `<tr class="${r[5]}"><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`
     ).join('');
 
-    // Detail table
+    // ===== Detail table =====
     const det=[
         ['Salaire brut',fmt(cS.sal),fmt(fS.sal),fmt(cpl.sal),fmt(cplPER.sal)],
-        ['Abattement 10%',fmt(cS.abC_),fmt(fS.abF_),fmt(cpl.abC_+cpl.abF_),fmt(cplPER.abC_+cplPER.abF_)],
+        ['Abattement 10%',fmt(cS.abatC),fmt(fS.abatF),fmt(cpl.abatC+cpl.abatF),fmt(cplPER.abatC+cplPER.abatF)],
         ['Salaire net fiscal',fmt(cS.netSal),fmt(fS.netSal),fmt(cpl.netSal),fmt(cplPER.netSal)],
         ['Dividendes (2DC)',fmt(inp.dcC),fmt(inp.dcF),fmt(inp.dcC+inp.dcF),fmt(inp.dcC+inp.dcF)],
         ['Interets (2TR)',fmt(inp.trC),fmt(inp.trF),fmt(inp.trC+inp.trF),fmt(inp.trC+inp.trF)],
@@ -282,8 +346,8 @@ function compute(){
         ['CSG deductible',fmt(cS.csgDed),fmt(fS.csgDed),fmt(cpl.csgDed),fmt(cplPER.csgDed)],
         ['PER deduit','0','0','0',fmt(cplPER.per)],
         ['Revenu imposable',fmt(cS.revImp),fmt(fS.revImp),fmt(cpl.revImp),fmt(cplPER.revImp)],
-        ['Quotient familial',fmt(cS.revImp),fmt(fS.revImp),fmt(cpl.revImp/partsC),fmt(cplPER.revImp/partsC)],
-        ['IR brut (bareme)',fmt(cS.irBrut),fmt(fS.irBrut),fmt(cpl.irBrut),fmt(cplPER.irBrut)],
+        ['Quotient familial',fmt(cS.revImp),fmt(fS.revImp),fmt(Math.round(cpl.revImp/partsC)),fmt(Math.round(cplPER.revImp/partsC))],
+        ['IR brut',fmt(cS.irBrut),fmt(fS.irBrut),fmt(cpl.irBrut),fmt(cplPER.irBrut)],
         ['Credits',fmt(cS.credits),fmt(fS.credits),fmt(cpl.credits),fmt(cplPER.credits)],
         ['IR net',fmt(cS.irNet),fmt(fS.irNet),fmt(cpl.irNet),fmt(cplPER.irNet)],
         ['PS (17.2%)',fmt(cS.psdue),fmt(fS.psdue),fmt(cpl.psdue),fmt(cplPER.psdue)],
@@ -293,47 +357,61 @@ function compute(){
         `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`
     ).join('');
 
-    // Repartition
-    const ecoMariageC=ecoMariage*partC;
-    const claudiaJuste=cS.totalTax-ecoMariageC;
-    const francoisJuste=cplPER.totalTax-claudiaJuste;
-    const soldeC=claudiaJuste-paidC;
-    const soldeF=francoisJuste-paidF;
-    const transfer=paidC-claudiaJuste; // >0 = Claudia a trop paye
+    // ===== Verdict =====
+    const resteAuFisc=coupleTotal-totalPaid;
 
-    function fmtS(n){const r=Math.round(n);return r>0?'<span class="neg">doit '+fmt(r)+' &euro;</span>':r<0?'<span class="pos">trop-paye '+fmt(-r)+' &euro;</span>':'OK'}
+    function fmtS(n){const r=Math.round(n);return r>0?'<span class="neg">doit encore '+fmt(r)+' &euro;</span>':r<0?'<span class="pos">trop-paye de '+fmt(-r)+' &euro;</span>':'OK'}
 
-    document.getElementById('repartDetail').innerHTML=`
-        <table>
-            <tr><th></th><th>Impot solo</th><th>Eco. mariage</th><th>Part juste</th><th>Deja paye</th><th>Solde</th></tr>
-            <tr><td>Claudia</td><td>${fmt(cS.totalTax)} &euro;</td><td class="pos">-${fmt(ecoMariageC)} &euro;</td><td><strong>${fmt(claudiaJuste)} &euro;</strong></td><td>${fmt(paidC)} &euro;</td><td>${fmtS(soldeC)}</td></tr>
-            <tr><td>Francois</td><td>${fmt(fS.totalTax)} &euro;</td><td class="pos">-${fmt(ecoMariage-ecoMariageC)} &euro; -${fmt(ecoPER)} &euro; <span class="mu">(PER)</span></td><td><strong>${fmt(francoisJuste)} &euro;</strong></td><td>${fmt(paidF)} &euro;</td><td>${fmtS(soldeF)}</td></tr>
-            <tr style="border-top:2px solid var(--border)"><td><strong>Total</strong></td><td>${fmt(sumSeuls)} &euro;</td><td class="pos">-${fmt(ecoTotal)} &euro;</td><td><strong>${fmt(cplPER.totalTax)} &euro;</strong></td><td><strong>${fmt(totalPaid)} &euro;</strong></td><td></td></tr>
-        </table>
-        <p style="margin-top:10px;color:var(--gray);font-size:.78rem;">
-            Eco. mariage partagee au prorata (C. ${(partC*100).toFixed(1)}%). Eco. PER (${fmt(ecoPER)} &euro;) pour Francois.
-            Chacun garde ses impots sur capitaux mobiliers (inclus dans l'impot solo).
-        </p>
-    `;
-
-    // Verdict
-    const resteAuFisc=cplPER.totalTax-totalPaid;
-    let verdictHTML=`
+    document.getElementById('verdict').innerHTML=`
         <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:12px;margin-bottom:16px;text-align:center">
-            <div><div class="mu">Impot couple (IR+PS)</div><div style="font-size:1.3rem;font-weight:700">${fmt(cplPER.totalTax)} &euro;</div></div>
+            <div><div class="mu">Impot couple total</div><div style="font-size:1.3rem;font-weight:700">${fmt(coupleTotal)} &euro;</div></div>
             <div><div class="mu">Deja paye (PAS)</div><div style="font-size:1.3rem;font-weight:700">${fmt(totalPaid)} &euro;</div><div class="mu">C. ${fmt(paidC)} + F. ${fmt(paidF)}</div></div>
-            <div><div class="mu">Reste au fisc</div><div style="font-size:1.3rem;font-weight:700;color:${resteAuFisc>0?'var(--red)':'var(--green)'}">${resteAuFisc>0?fmt(resteAuFisc):'Remboursement '+fmt(-resteAuFisc)} &euro;</div></div>
+            <div><div class="mu">${resteAuFisc>0?'Reste a payer':'Remboursement'}</div><div style="font-size:1.3rem;font-weight:700;color:${resteAuFisc>0?'var(--red)':'var(--green)'}">${fmt(Math.abs(resteAuFisc))} &euro;</div></div>
         </div>
-        <div style="border-top:2px solid var(--border);padding-top:16px">
-            <div class="mu" style="margin-bottom:4px">${transfer>0?'Claudia a trop paye, Francois la rembourse':transfer<0?'Claudia doit payer a Francois':'Equilibre'}</div>
-            <div style="font-size:.95rem;margin-bottom:2px"><strong>${transfer>0?'Francois verse a Claudia':'Claudia verse a Francois'}</strong></div>
+
+        <table class="split-table">
+            <tr><th></th><th>Impot salaire</th><th>Impot capitaux</th><th>Part juste</th><th>Deja paye</th><th>Solde</th></tr>
+            <tr>
+                <td>Claudia</td>
+                <td>${fmt(salShareC)} &euro; <span class="mu">(solo ${fmt(salCSolo.totalTax)} - eco ${fmt(salEcoMariageC)})</span></td>
+                <td>${fmt(investC.total)} &euro;</td>
+                <td><strong>${fmt(claudiaJuste)} &euro;</strong></td>
+                <td>${fmt(paidC)} &euro;</td>
+                <td>${fmtS(soldeC)}</td>
+            </tr>
+            <tr>
+                <td>Francois</td>
+                <td>${fmt(salShareF)} &euro; <span class="mu">(solo ${fmt(salFSolo.totalTax)} - eco ${fmt(salEcoMariageF)} - PER ${fmt(salEcoPER)})</span></td>
+                <td>${fmt(investF.total)} &euro;</td>
+                <td><strong>${fmt(adjustedFrancoisJuste)} &euro;</strong></td>
+                <td>${fmt(paidF)} &euro;</td>
+                <td>${fmtS(soldeF)}</td>
+            </tr>
+            <tr class="total">
+                <td>Total</td>
+                <td>${fmt(salCoupleWithPER.totalTax)} &euro;</td>
+                <td>${fmt(investC.total+investF.total)} &euro;</td>
+                <td><strong>${fmt(coupleTotal)} &euro;</strong></td>
+                <td><strong>${fmt(totalPaid)} &euro;</strong></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <div style="border-top:2px solid var(--border);padding-top:16px;margin-top:8px;text-align:center">
+            <div class="mu" style="margin-bottom:4px">
+                ${transfer>0?'Claudia a trop paye par rapport a sa part juste':'Claudia n\'a pas assez paye par rapport a sa part juste'}
+            </div>
+            <div style="font-size:1rem;margin-bottom:2px">
+                <strong>${transfer>0?'Francois verse a Claudia':'Claudia verse a Francois'}</strong>
+            </div>
             <div class="amount">${fmt(Math.abs(transfer))} &euro;</div>
-            <div class="sub">
-                Part juste : Claudia <strong>${fmt(claudiaJuste)} &euro;</strong> / Francois <strong>${fmt(francoisJuste)} &euro;</strong>
+            <div class="sub" style="margin-top:8px">
+                Eco. mariage salaires : ${fmt(salEcoMariage)} &euro; (C. ${fmt(salEcoMariageC)} / F. ${fmt(salEcoMariageF)})
+                &bull; Eco. PER : ${fmt(salEcoPER)} &euro; (pour F.)
+                &bull; Capitaux : C. ${fmt(investC.total)} &euro; / F. ${fmt(investF.total)} &euro;
             </div>
         </div>
     `;
-    document.getElementById('verdict').innerHTML=verdictHTML;
 }
 
 compute();
