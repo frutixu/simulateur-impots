@@ -401,7 +401,7 @@ compute();
 // ===== Password =====
 function simpleHash(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return(h>>>0).toString(16)}
 function checkPwd(){
-    if(simpleHash($('pwdInput').value)===simpleHash('Impots C&F')){
+    if(simpleHash($('pwdInput').value)==='f8c21b45'){
         $('loginGate').style.display='none';$('app').style.display='block';sessionStorage.setItem('auth','1');
     }else $('pwdError').style.display='block';
 }
